@@ -5,8 +5,8 @@ interface CartItem {
   id: number;
   name: string;
   price: number;
-  quantity: number; // Total quantity for this item
-  eatInQuantity: number; // Quantity for "Eat In"
+  quantity: number;
+  eatInQuantity: number;
   takeAwayQuantity: number; // Quantity for "Takeaway"
 }
 
@@ -20,7 +20,7 @@ interface CartContextType {
   ) => void;
   removeItem: (id: number) => void;
   getTotalPrice: () => number;
-  animation: Animated.Value; // Animation value
+  animation: Animated.Value;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);

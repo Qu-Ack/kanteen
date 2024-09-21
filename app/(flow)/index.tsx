@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  RefreshControl, // Import RefreshControl
 } from "react-native";
 import { SearchBar } from "react-native-elements";
 import { useCart } from "./cartContext"; // Adjust the path as needed
@@ -15,47 +16,78 @@ import ItemComponent from "@/my_components/ItemComponent"; // Adjust the path as
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { cart, addToCart } = useCart();
 
-  const categories = ["All", "Beverages", "Snacks", "Meals", "Desserts"];
+  type Item = {
+    ID: number;
+    Name: string;
+    Price: number;
+    Stock: number;
+    CategoryID: number;
+    CategoryName: string;
+  };
 
-  const menuItems = [
-    {
-      id: 1,
-      name: "Burger",
-      category: "Meals",
-      image: "https://example.com/burger.jpg",
-      price: 5.99,
-    },
-    {
-      id: 2,
-      name: "Coke",
-      category: "Beverages",
-      image: "https://example.com/coke.jpg",
-      price: 1.99,
-    },
-    {
-      id: 3,
-      name: "French Fries",
-      category: "Snacks",
-      image: "https://example.com/fries.jpg",
-      price: 2.99,
-    },
-    {
-      id: 4,
-      name: "Ice Cream",
-      category: "Desserts",
-      image: "https://example.com/icecream.jpg",
-      price: 3.49,
-    },
-  ];
+  type Category = {
+    ID: number;
+    Name: string;
+  };
 
+  const [menuItems, setMenuItems] = useState<Item[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = React.useState("");
   const [selectedCategory, setSelectedCategory] = React.useState("All");
+  const [refreshing, setRefreshing] = useState(false); // Add refreshing state
+
+  const fetchItems = async () => {
+    try {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}item`);
+      if (!response.ok) {
+        // perform error logic here
+        console.log("something");
+      }
+      const data = await response.json();
+      setMenuItems(data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}category`,
+      );
+      if (!response.ok) {
+        // perform error logic here
+        console.log("something");
+      }
+      const data = await response.json();
+      console.log(data);
+      setCategories(data);
+    } catch (err) {
+      // perform error logic here
+      console.log(err);
+    }
+  };
+
+  const loadData = async () => {
+    setRefreshing(true);
+    await Promise.all([fetchItems(), fetchCategories()]);
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const filteredMenu = menuItems.filter(
     (item) =>
-      (selectedCategory === "All" || item.category === selectedCategory) &&
-      item.name.toLowerCase().includes(search.toLowerCase()),
+      (selectedCategory === "All" || item.CategoryName === selectedCategory) &&
+      item.Name.toLowerCase().includes(search.toLowerCase()),
   );
+
+  // Function to handle refreshing the screen
+  const handleRefresh = () => {
+    loadData(); // Refetch items and categories when refreshing
+  };
 
   return (
     <View style={styles.container}>
@@ -74,34 +106,48 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         contentContainerStyle={styles.categoryContainer}
         style={styles.scrollView}
       >
+        <TouchableOpacity
+          style={[
+            styles.categoryButton,
+            selectedCategory === "All" && styles.selectedCategory,
+          ]}
+          onPress={() => setSelectedCategory("All")}
+        >
+          <Text style={styles.categoryText}>{"All"}</Text>
+        </TouchableOpacity>
+
         {categories.map((category) => (
           <TouchableOpacity
-            key={category}
+            key={category.ID}
             style={[
               styles.categoryButton,
-              selectedCategory === category && styles.selectedCategory,
+              selectedCategory === category.Name && styles.selectedCategory,
             ]}
-            onPress={() => setSelectedCategory(category)}
+            onPress={() => setSelectedCategory(category.Name)}
           >
-            <Text style={styles.categoryText}>{category}</Text>
+            <Text style={styles.categoryText}>{category.Name}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
       <FlatList
         data={filteredMenu}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.ID.toString()}
         numColumns={2}
         columnWrapperStyle={styles.row}
         renderItem={({ item }) => (
           <ItemComponent
-            id={item.id}
-            name={item.name}
-            price={item.price}
-            image={item.image}
+            id={item.ID}
+            name={item.Name}
+            price={item.Price}
+            image={`http://google.com`}
           />
         )}
         contentContainerStyle={styles.menuList}
+        refreshControl={
+          // Add refresh control to the FlatList
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
       />
     </View>
   );

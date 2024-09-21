@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TextInput,
   Button,
+  TouchableOpacity,
 } from "react-native";
 import { useCart } from "./cartContext"; // Adjust the path as needed
 
@@ -29,6 +30,23 @@ const CartScreen: React.FC = () => {
       updateItemQuantity(id, eatIn, takeAway);
     }
   };
+
+  async function handleOrder() {
+    try {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}order`, {
+        method: "POST",
+        body: JSON.stringify({ user_id: 2, items: cart }),
+      });
+
+      if (!response.ok) {
+        console.log("an error occured");
+      }
+      const data = await response.json();
+      console.log(data);
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -81,6 +99,9 @@ const CartScreen: React.FC = () => {
           Total Price: ${totalPrice.toFixed(2)}
         </Text>
       </View>
+      <TouchableOpacity onPress={() => handleOrder()}>
+        <Text>Order</Text>
+      </TouchableOpacity>
     </View>
   );
 };
