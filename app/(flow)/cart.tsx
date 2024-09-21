@@ -32,6 +32,7 @@ const CartScreen: React.FC = () => {
   };
 
   async function handleOrder() {
+    console.log(cart);
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}order`, {
         method: "POST",
