@@ -6,12 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
-  RefreshControl, // Import RefreshControl
+  RefreshControl,
 } from "react-native";
 import { SearchBar } from "react-native-elements";
 import { useCart } from "./cartContext"; // Adjust the path as needed
 import ItemComponent from "@/my_components/ItemComponent"; // Adjust the path as needed
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { cart, addToCart } = useCart();
@@ -32,16 +33,15 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const [menuItems, setMenuItems] = useState<Item[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [search, setSearch] = React.useState("");
-  const [selectedCategory, setSelectedCategory] = React.useState("All");
-  const [refreshing, setRefreshing] = useState(false); // Add refreshing state
+  const [search, setSearch] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchItems = async () => {
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}item`);
       if (!response.ok) {
-        // perform error logic here
-        console.log("something");
+        console.log("Failed to fetch items.");
       }
       const data = await response.json();
       setMenuItems(data);
@@ -56,14 +56,11 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         `${process.env.EXPO_PUBLIC_API_URL}category`,
       );
       if (!response.ok) {
-        // perform error logic here
-        console.log("something");
+        console.log("Failed to fetch categories.");
       }
       const data = await response.json();
-      console.log(data);
       setCategories(data);
     } catch (err) {
-      // perform error logic here
       console.log(err);
     }
   };
@@ -74,7 +71,18 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     setRefreshing(false);
   };
 
+  async function check() {
+    try {
+      const value = await AsyncStorage.getItem("user_id");
+      if (value == null) {
+        router.push("/");
+      }
+      console.log(value);
+    } catch (err) {}
+  }
+
   useEffect(() => {
+    check();
     loadData();
   }, []);
 
@@ -84,16 +92,22 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       item.Name.toLowerCase().includes(search.toLowerCase()),
   );
 
-  // Function to handle refreshing the screen
   const handleRefresh = () => {
-    loadData(); // Refetch items and categories when refreshing
+    loadData();
+  };
+
+  const handleSearchChange = (text: string) => {
+    setSearch(text);
+    return;
   };
 
   return (
     <View style={styles.container}>
       <SearchBar
         placeholder="Search food..."
-        onChangeText={(value) => setSearch(value)}
+        onChangeText={(text) => {
+          handleSearchChange(text);
+        }}
         value={search}
         lightTheme
         round
@@ -145,7 +159,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         )}
         contentContainerStyle={styles.menuList}
         refreshControl={
-          // Add refresh control to the FlatList
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       />
@@ -180,7 +193,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   selectedCategory: {
-    backgroundColor: "#ff6347", // Same as the tab icon color
+    backgroundColor: "#ff6347",
   },
   categoryText: {
     fontSize: 16,

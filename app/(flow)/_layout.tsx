@@ -3,7 +3,7 @@ import { Tabs } from "expo-router";
 import { View, Text, StyleSheet, Animated } from "react-native";
 import { Icon } from "react-native-elements";
 import { CartProvider, useCart } from "./cartContext"; // Adjust the path as needed
-import HomeScreen from "./index";
+import HomeScreen from "./home";
 import ProfileScreen from "./profile";
 import CartScreen from "./cart";
 
@@ -24,7 +24,7 @@ const TabLayoutContent: React.FC = () => {
 
           return (
             <View style={styles.iconContainer}>
-              {route.name === "index" ? (
+              {route.name === "home" ? (
                 <Icon
                   name="home"
                   type="font-awesome"
@@ -62,7 +62,7 @@ const TabLayoutContent: React.FC = () => {
             <Text style={[styles.label, { color: labelColor }]}>
               {route.name === "cart"
                 ? "Cart"
-                : route.name === "index"
+                : route.name === "home"
                   ? "Home"
                   : route.name === "profile"
                     ? "Profile"
@@ -72,7 +72,7 @@ const TabLayoutContent: React.FC = () => {
         },
       })}
     >
-      <Tabs.Screen name="index" options={{ title: "Home" }} />
+      <Tabs.Screen name="home" options={{ title: "Home" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
       <Tabs.Screen name="cart" options={{ title: "Cart" }} />
     </Tabs>

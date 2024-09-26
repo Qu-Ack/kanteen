@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useCart } from "./cartContext"; // Adjust the path as needed
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CartScreen: React.FC = () => {
   const { cart, getTotalPrice, updateItemQuantity, removeItem } = useCart();
@@ -34,9 +35,10 @@ const CartScreen: React.FC = () => {
   async function handleOrder() {
     console.log(cart);
     try {
+      const userId = await AsyncStorage.getItem("user_id");
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}order`, {
         method: "POST",
-        body: JSON.stringify({ user_id: 2, items: cart }),
+        body: JSON.stringify({ user_id: userId, items: cart }),
       });
 
       if (!response.ok) {
@@ -44,6 +46,8 @@ const CartScreen: React.FC = () => {
       }
       const data = await response.json();
       console.log(data);
+      // router.push("/to an order confirmation screen that you can't go back from and shows you how many orders are there before you and you can go back to home
+      // and your order is still visible ")
     } catch (err) {
       console.log(err);
     }
