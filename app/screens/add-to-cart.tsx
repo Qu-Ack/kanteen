@@ -71,8 +71,8 @@ const AddToCartScreen = () => {
         </Picker>
       </View>
 
-      <Button title="Add to Cart" onPress={handleAddToCart} />
-      <Button title="Cancel" onPress={() => router.back()} color="red" />
+      <Button title="Add to Cart" onPress={handleAddToCart} color="#FF8C00" />
+      <Button title="Cancel" onPress={() => router.back()} color="#B22222" />
     </View>
   );
 };
@@ -82,22 +82,28 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: "center",
+    backgroundColor: "#FFF5E5", // Light background color to complement the main color
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
+    color: "#FF8C00", // Main color for the title text
+    textAlign: "center",
   },
   fieldContainer: {
     marginBottom: 20,
   },
   fieldLabel: {
-    fontSize: 16,
+    fontSize: 18,
     marginBottom: 5,
+    color: "#FF8C00", // Main color for field labels
   },
   picker: {
     height: 50,
     width: "100%",
+    backgroundColor: "#FFDAB9", // Light orange shade for picker background
+    borderRadius: 5,
   },
 });
 

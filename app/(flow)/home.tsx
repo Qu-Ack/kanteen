@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   RefreshControl,
+  Button,
+  Linking,
 } from "react-native";
 import { SearchBar } from "react-native-elements";
 import { useCart } from "./cartContext"; // Adjust the path as needed
@@ -14,17 +16,16 @@ import ItemComponent from "@/my_components/ItemComponent"; // Adjust the path as
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 
+export type Item = {
+  ID: number;
+  Name: string;
+  Price: number;
+  Stock: number;
+  CategoryID: number;
+  CategoryName: string;
+};
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { cart, addToCart } = useCart();
-
-  type Item = {
-    ID: number;
-    Name: string;
-    Price: number;
-    Stock: number;
-    CategoryID: number;
-    CategoryName: string;
-  };
 
   type Category = {
     ID: number;

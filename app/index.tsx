@@ -4,8 +4,20 @@ import { useEffect } from "react";
 import { Button, Text, View, StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+async function test() {
+  try {
+    await AsyncStorage.setItem(
+      "user_id",
+      "d057684e-5bf3-4638-9fef-2ed9649d4a7c",
+    );
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 export default function Welcome() {
   useEffect(() => {
+    test();
     async function check() {
       try {
         const value = await AsyncStorage.getItem("user_id");

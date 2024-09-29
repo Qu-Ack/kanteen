@@ -5,14 +5,16 @@ import {
   FlatList,
   StyleSheet,
   TextInput,
-  Button,
   TouchableOpacity,
 } from "react-native";
 import { useCart } from "./cartContext"; // Adjust the path as needed
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { usePaymentContext } from "../../hooks/paymentFlowContext";
+import { router } from "expo-router";
 
 const CartScreen: React.FC = () => {
   const { cart, getTotalPrice, updateItemQuantity, removeItem } = useCart();
+  const {addUserId } = usePaymentContext();
   const cartItems = Object.values(cart);
 
   const totalPrice = getTotalPrice();
@@ -33,24 +35,9 @@ const CartScreen: React.FC = () => {
   };
 
   async function handleOrder() {
-    console.log(cart);
-    try {
-      const userId = await AsyncStorage.getItem("user_id");
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}order`, {
-        method: "POST",
-        body: JSON.stringify({ user_id: userId, items: cart }),
-      });
-
-      if (!response.ok) {
-        console.log("an error occured");
-      }
-      const data = await response.json();
-      console.log(data);
-      // router.push("/to an order confirmation screen that you can't go back from and shows you how many orders are there before you and you can go back to home
-      // and your order is still visible ")
-    } catch (err) {
-      console.log(err);
-    }
+    const userId = await AsyncStorage.getItem("user_id");
+    addUserId(userId!);
+    router.push("/screens/payment");
   }
 
   return (
@@ -94,7 +81,12 @@ const CartScreen: React.FC = () => {
               Price: ${Number(item.price || 0).toFixed(2)}
             </Text>
 
-            <Button title="Remove Item" onPress={() => removeItem(item.id)} />
+            <TouchableOpacity
+              style={styles.removeButton}
+              onPress={() => removeItem(item.id)}
+            >
+              <Text style={styles.removeButtonText}>Remove Item</Text>
+            </TouchableOpacity>
           </View>
         )}
         contentContainerStyle={styles.cartList}
@@ -104,8 +96,11 @@ const CartScreen: React.FC = () => {
           Total Price: ${totalPrice.toFixed(2)}
         </Text>
       </View>
-      <TouchableOpacity onPress={() => handleOrder()}>
-        <Text>Order</Text>
+      <TouchableOpacity
+        style={styles.orderButton}
+        onPress={() => handleOrder()}
+      >
+        <Text style={styles.orderButtonText}>Place Order</Text>
       </TouchableOpacity>
     </View>
   );
@@ -123,10 +118,13 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     borderRadius: 8,
     elevation: 1,
+    borderColor: "#ff6347", // Main orange color border
+    borderWidth: 1,
   },
   itemName: {
     fontSize: 18,
     fontWeight: "bold",
+    color: "#ff6347", // Main orange color
   },
   itemLabel: {
     fontSize: 16,
@@ -140,6 +138,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginVertical: 5,
     width: "100%",
+    borderWidth: 1,
+    borderColor: "#ff6347", // Main orange color
   },
   itemPrice: {
     fontSize: 16,
@@ -159,6 +159,30 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
+    color: "#ff6347", // Main orange color
+  },
+  removeButton: {
+    backgroundColor: "#ff6347", // Main orange color
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  removeButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  orderButton: {
+    backgroundColor: "#ff6347", // Main orange color
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  orderButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 
